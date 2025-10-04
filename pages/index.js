@@ -157,7 +157,7 @@ const chatbotHTML = `<!DOCTYPE html>
       const r = await fetch(API, {
         method: 'POST',
         headers: {'content-type':'application/json'},
-        body: JSON.stringify({ sessionId: sessionId(), text })
+       body: JSON.stringify({ sessionId: sessionId(), chatInput: text })
       });
       removeTyping();
       let data = {};
