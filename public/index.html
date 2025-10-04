@@ -1,1082 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IMF Europe Mentions Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Influencer Research Assistant — Chat Config</title>
   <style>
     :root {
-      --bg-primary: #f8fafc;
-      --bg-secondary: #ffffff;
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #64748b;
-      --accent-primary: #2563eb;
-      --accent-secondary: #3b82f6;
-      --success: #059669;
-      --warning: #d97706;
-      --error: #dc2626;
-      --border: #e2e8f0;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --radius-sm: 6px;
-      --radius-md: 8px;
-      --radius-lg: 12px;
+      --bg-primary:#f8fafc; --bg-secondary:#fff;
+      --text-primary:#0f172a; --text-secondary:#475569; --text-muted:#64748b;
+      --accent-primary:#2563eb; --accent-secondary:#3b82f6;
+      --success:#059669; --warning:#d97706; --error:#dc2626;
+      --border:#e2e8f0;
+      --shadow-sm:0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md:0 4px 6px -1px rgb(0 0 0 / 0.1),0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg:0 10px 15px -3px rgb(0 0 0 / 0.1),0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius-sm:6px; --radius-md:8px; --radius-lg:12px;
     }
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg-primary);margin:0;color:var(--text-primary);line-height:1.6}
+    .header{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;padding:24px 20px;box-shadow:var(--shadow-lg)}
+    .header h1{margin:0 0 8px;font-size:24px;font-weight:700}
+    .header p{margin:0;opacity:.9;font-size:15px}
 
-    * { box-sizing: border-box; }
+    .toolbar{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:16px 20px;box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:10}
+    .toolbar-grid{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+    .toolbar-left{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+    .control-group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .control-group label{font-size:13px;font-weight:500;color:var(--text-secondary);white-space:nowrap}
 
-    body {
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg-primary);
-      margin: 0;
-      color: var(--text-primary);
-      line-height: 1.6;
-    }
+    .btn{padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-size:13px;font-weight:500;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+    .btn:hover{background:var(--bg-primary);border-color:var(--accent-primary)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    select,input[type="text"],input[type="search"],input[type="password"],input[type="email"]{padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-size:13px;transition:.15s}
+    select:focus,input:focus{outline:none;border-color:var(--accent-primary);box-shadow:0 0 0 3px rgb(37 99 235 / .1)}
 
-    .header {
-      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-      color: white;
-      padding: 24px 20px;
-      box-shadow: var(--shadow-lg);
-    }
+    .status{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px}
+    .main-content{padding:20px}
+    .grid{display:grid;grid-template-columns:1fr;gap:20px}
+    .card{background:var(--bg-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:20px;border:1px solid transparent}
+    .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--border)}
+    .hidden{display:none}
 
-    .header h1 {
-      margin: 0 0 8px;
-      font-size: 24px;
-      font-weight: 700;
-    }
+    /* Chat panel */
+    .chat-log{height:52vh;min-height:260px;overflow:auto;border:1px solid var(--border);border-radius:12px;padding:12px;background:#f1f5f9}
+    .msg{display:flex;gap:10px;margin:10px 0}
+    .bubble{padding:10px 12px;border-radius:12px;max-width:85%;white-space:pre-wrap}
+    .me{justify-content:flex-end}
+    .me .bubble{background:#e0ecff;border:1px solid #c7ddff}
+    .bot .bubble{background:#eef2ff;border:1px solid #dbe3ff}
+    .chat-input{display:flex;gap:8px;margin-top:12px}
+    .chat-input input{flex:1}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace;background:#eef2ff;border:1px solid #c7d2fe;padding:1px 6px;border-radius:6px;color:#3730a3}
 
-    .header p {
-      margin: 0;
-      opacity: 0.9;
-      font-size: 15px;
-    }
-
-    .toolbar {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 20px;
-      box-shadow: var(--shadow-sm);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .toolbar-grid {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .toolbar-left {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .toolbar-right {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .control-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .control-group label {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
-
-    .btn {
-      padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn:hover {
-      background: var(--bg-primary);
-      border-color: var(--accent-primary);
-    }
-
-    .btn.active {
-      background: var(--accent-primary);
-      color: white;
-      border-color: var(--accent-primary);
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .file-input-wrapper {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-    }
-
-    .file-input {
-      position: absolute;
-      left: -9999px;
-    }
-
-    select, input[type="text"], input[type="search"] {
-      padding: 8px 10px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      font-size: 13px;
-      transition: all 0.15s ease;
-    }
-
-    select:focus, input:focus {
-      outline: none;
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
-    }
-
-    .status {
-      font-size: 12px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .main-content {
-      padding: 20px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
-      padding: 20px;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--border);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      color: white;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .card-meta {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .card-name {
-      font-weight: 600;
-      font-size: 16px;
-      color: var(--text-primary);
-      margin-bottom: 2px;
-    }
-
-    .card-role {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 2px;
-    }
-
-    .card-date {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .card-quote {
-      background: var(--bg-primary);
-      border-left: 3px solid var(--accent-primary);
-      padding: 12px 16px;
-      margin: 16px 0;
-      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-      font-style: italic;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    .card-context {
-      font-size: 13px;
-      color: var(--text-secondary);
-      background: var(--bg-primary);
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      margin-bottom: 16px;
-    }
-
-    .card-context strong {
-      color: var(--text-primary);
-    }
-
-    .card-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      height: 24px;
-      padding: 0 8px;
-      border-radius: var(--radius-md);
-      font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      border: 1px solid;
-      white-space: nowrap;
-    }
-
-    .badge:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .badge.tone-supportive {
-      background: #dcfce7;
-      color: #166534;
-      border-color: #bbf7d0;
-    }
-
-    .badge.tone-critical {
-      background: #fee2e2;
-      color: #991b1b;
-      border-color: #fecaca;
-    }
-
-    .badge.tone-neutral {
-      background: #fef3c7;
-      color: #92400e;
-      border-color: #fde68a;
-    }
-
-    .badge.topic {
-      background: #f1f5f9;
-      color: var(--text-secondary);
-      border-color: var(--border);
-    }
-
-    .badge.topic:hover {
-      background: var(--accent-primary);
-      color: white;
-      border-color: var(--accent-primary);
-    }
-
-    .card-footer {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .card-footer a {
-      font-size: 12px;
-      color: var(--accent-primary);
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .card-footer a:hover {
-      text-decoration: underline;
-    }
-
-    .card-footer .separator {
-      color: var(--text-muted);
-      font-size: 12px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-      grid-column: 1 / -1;
-    }
-
-    .empty-state h3 {
-      margin: 0 0 8px;
-      color: var(--text-secondary);
-    }
-
-    @media (max-width: 768px) {
-      .toolbar-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-      
-      .toolbar-left {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-      }
-      
-      .control-group {
-        justify-content: space-between;
-      }
-      
-      .grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .main-content {
-        padding: 16px;
-      }
-    }
+    @media (max-width:768px){.toolbar-grid{grid-template-columns:1fr}.main-content{padding:16px}}
   </style>
 </head>
 <body>
   <header class="header">
-    <h1>Europe Mentions – IMF References Dashboard</h1>
-    <p>Upload CSV files to analyze IMF-related mentions from European officials and institutions. Filter, search, and export your data seamlessly.</p>
+    <h1>Influencer Research Assistant — Chat Config</h1>
+    <p>Password-gated chat intake. Configure options, then converse. Messages are forwarded to your n8n webhook via <span class="kbd">/api/proxy</span>.</p>
   </header>
 
+  <!-- Top toolbar: Login + quick settings -->
   <div class="toolbar">
     <div class="toolbar-grid">
       <div class="toolbar-left">
-        <div class="control-group">
-          <div class="file-input-wrapper">
-            <input type="file" id="csvFile" class="file-input" accept=".csv" onchange="handleFileUpload(this)" />
-            <label for="csvFile" class="btn">📁 Upload CSV</label>
-          </div>
-          <button class="btn" onclick="addSampleData()">🧪 Add Test Data</button>
-          <button id="downloadBtn" class="btn" onclick="downloadCSV()" disabled>⬇️ Download CSV</button>
-          <button id="pdfBtn" class="btn" onclick="downloadReport()" disabled>📄 Download Report</button>
-          <button class="btn" onclick="clearAllData()">🗑️ Clear Data</button>
+        <!-- Login -->
+        <div class="control-group" id="loginRow">
+          <label for="pass">Access code</label>
+          <input id="pass" type="password" placeholder="Enter password"/>
+          <button id="loginBtn" class="btn">Unlock</button>
         </div>
 
+        <!-- Quick config (enabled after login) -->
         <div class="control-group">
-          <label><strong>Tone:</strong></label>
-          <button class="btn tone-btn active" data-tone="All" onclick="setToneFilter('All', this)">All</button>
-          <button class="btn tone-btn" data-tone="Supportive" onclick="setToneFilter('Supportive', this)">Supportive</button>
-          <button class="btn tone-btn" data-tone="Critical" onclick="setToneFilter('Critical', this)">Critical</button>
-          <button class="btn tone-btn" data-tone="Neutral" onclick="setToneFilter('Neutral', this)">Neutral</button>
-        </div>
-
-        <div class="control-group">
-          <label for="topicSelect">Topic:</label>
-          <select id="topicSelect" onchange="filterData()">
-            <option value="">All Topics</option>
+          <label for="job">Job</label>
+          <select id="job" disabled>
+            <option value="">Let bot ask</option>
+            <option value="profile">Profile</option>
+            <option value="infographic">Infographic</option>
+            <option value="full_research">Full research</option>
           </select>
-          
-          <label for="institutionSelect">Institution:</label>
-          <select id="institutionSelect" onchange="filterData()">
-            <option value="">All Institutions</option>
-          </select>
-        </div>
 
-        <div class="control-group">
-          <input 
-            id="searchBox" 
-            type="search" 
-            placeholder="Search names, quotes, context..." 
-            style="width: 250px;"
-            oninput="filterData()"
-          />
-          <button class="btn" onclick="clearFilters()">Clear Filters</button>
+          <label for="delivery">Delivery</label>
+          <select id="delivery" disabled>
+            <option value="">Let bot ask</option>
+            <option value="link">Link</option>
+            <option value="email">Email</option>
+          </select>
+
+          <input id="email" type="email" placeholder="Recipient email (if delivery=email)" disabled style="min-width:220px"/>
+          <input id="workEmail" type="email" placeholder="(Optional) your work email" disabled style="min-width:220px"/>
         </div>
       </div>
 
-      <div class="toolbar-right">
-        <div class="status">
-          <span id="status">Ready</span>
-          <span id="count"></span>
-        </div>
+      <div class="status">
+        <span id="status">Locked</span>
       </div>
     </div>
   </div>
 
+  <!-- Main: Chat card -->
   <main class="main-content">
-    <div class="grid" id="cards">
-      <div class="empty-state">
-        <h3>No data loaded</h3>
-        <p>Upload a CSV file or click "🧪 Add Test Data" to get started</p>
-      </div>
+    <div class="grid">
+      <section class="card">
+        <h3 style="margin-top:0">Chat</h3>
+        <div id="chatLockedHint" class="status">Enter the access code to start.</div>
+
+        <div id="chatArea" class="hidden">
+          <div id="log" class="chat-log"></div>
+          <div class="chat-input">
+            <input id="text" type="text" placeholder="Type here… (e.g., 'Infographic for Oren Cass')"/>
+            <button id="send" class="btn">Send</button>
+          </div>
+          <div class="status" style="margin-top:6px">
+            <span id="ticket"></span>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 
 <script>
-// Global data
-var allData = [];
-var filteredData = [];
-var currentFilters = {
-  tone: 'All',
-  topic: '',
-  institution: '',
-  search: ''
-};
-
-// Utility functions
-function escapeHtml(text) {
-  if (!text) return '';
-  var div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+/* ========= basic helpers ========= */
+const $ = (id) => document.getElementById(id);
+function sid() {
+  let s = localStorage.getItem("sessionId");
+  if (!s) { s = "web_" + Math.random().toString(36).slice(2) + Date.now(); localStorage.setItem("sessionId", s); }
+  return s;
+}
+function setStatus(t){ const el=$("status"); if(el) el.textContent=t; }
+function enableControls(on){
+  ["job","delivery","email","workEmail","text","send"].forEach(id=>{ const el=$(id); if(el) el.disabled = !on; });
+}
+function add(role, text) {
+  const log = $("log");
+  const row = document.createElement("div");
+  row.className = "msg " + (role === "me" ? "me" : "bot");
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.textContent = text;
+  row.appendChild(b);
+  log.appendChild(row);
+  log.scrollTop = log.scrollHeight;
 }
 
-function getInitials(name) {
-  if (!name) return '?';
-  var parts = name.trim().split(' ');
-  return (parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '');
-}
-
-function updateStatus(message) {
-  var statusEl = document.getElementById('status');
-  if (statusEl) statusEl.textContent = message;
-}
-
-function updateCount() {
-  var countEl = document.getElementById('count');
-  if (countEl) {
-    countEl.textContent = filteredData.length + ' record' + (filteredData.length !== 1 ? 's' : '');
+/* ========= login flow ========= */
+async function login() {
+  const pass = $("pass").value.trim();
+  if (!pass) return alert("Enter the password.");
+  setStatus("Checking…");
+  try {
+    const r = await fetch("/api/auth?pass=" + encodeURIComponent(pass));
+    if (r.status !== 200) throw new Error("forbidden");
+    // unlocked
+    $("chatLockedHint").classList.add("hidden");
+    $("chatArea").classList.remove("hidden");
+    enableControls(true);
+    setStatus("Unlocked");
+    add("bot",
+      "Hi! I can help prepare the research.\n" +
+      "1) What should I produce (profile, infographic, or full research)?\n" +
+      "2) Who is the influencer (full name)? If there are several, I’ll list options.\n" +
+      "3) Prefer delivery via email or link?"
+    );
+  } catch {
+    setStatus("Locked");
+    alert("Access denied. Check the password with the team.");
   }
 }
 
-function updateButtonStates() {
-  var hasData = allData.length > 0;
-  var downloadBtn = document.getElementById('downloadBtn');
-  var pdfBtn = document.getElementById('pdfBtn');
-  if (downloadBtn) downloadBtn.disabled = !hasData;
-  if (pdfBtn) pdfBtn.disabled = !hasData;
-}
+/* ========= chat send ========= */
+async function send() {
+  const t = $("text");
+  const v = (t.value || "").trim();
+  if (!v) return;
+  add("me", v);
+  t.value = "";
+  $("send").disabled = true;
 
-// Data transformation
-function transformRecord(record) {
-  return {
-    person: record.person || record.Person || '',
-    role: buildRole(record),
-    institution: record.institution || record.Institution || '',
-    date: record.date_iso || record.date || record.Date || '',
-    quote: record.quote_verbatim || record.quote || record.Quote || '',
-    tone: normalizeTone(record.tone_toward_imf || record.tone || record.Tone || ''),
-    topics: splitTopics(record.topic_tags || record.topics || record.Topics || ''),
-    context: record.context || record.Context || record.context_summary || '',
-    source: record.venue_link || record.source_url || record.Source || '',
-    secondary: record.secondary_links || ''
+  // collect optional config (passed through; your n8n flow can use/ignore)
+  const payload = {
+    sessionId: sid(),
+    text: v,
+    job: $("job").value || undefined,
+    delivery: $("delivery").value || undefined,
+    recipient_email: $("email").value || undefined,
+    workEmail: $("workEmail").value || undefined
   };
-}
 
-function buildRole(record) {
-  var parts = [];
-  if (record.role || record.Role) parts.push(record.role || record.Role);
-  if (record.institution_country) parts.push(record.institution_country);
-  return parts.join(', ');
-}
-
-function normalizeTone(tone) {
-  var t = String(tone).toLowerCase();
-  if (t.includes('sup') || t.includes('pos')) return 'Supportive';
-  if (t.includes('cri') || t.includes('neg')) return 'Critical';
-  return 'Neutral';
-}
-
-function splitTopics(topicsString) {
-  if (!topicsString) return [];
-  return topicsString
-    .split(/[|,;]+/)
-    .map(function(t) { return t.trim(); })
-    .filter(Boolean);
-}
-
-// File upload
-function handleFileUpload(input) {
-  if (!input.files || !input.files[0]) return;
-  
-  var file = input.files[0];
-  if (!file.name.toLowerCase().endsWith('.csv')) {
-    alert('Please select a CSV file');
-    return;
-  }
-  
-  updateStatus('Reading file: ' + file.name);
-  
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var csvText = e.target.result;
-      var data = parseCSV(csvText);
-      
-      if (data.length === 0) {
-        updateStatus('No data found in CSV file');
-        return;
-      }
-      
-      allData = data.map(transformRecord);
-      saveToStorage();
-      populateFilters();
-      filterData();
-      updateButtonStates();
-      updateStatus('Successfully loaded ' + allData.length + ' records from ' + file.name);
-      
-    } catch (error) {
-      updateStatus('Error reading CSV file: ' + error.message);
-    }
-  };
-  
-  reader.readAsText(file);
-}
-
-// Simple CSV parser
-function parseCSV(text) {
-  var lines = text.trim().split('\n');
-  if (lines.length < 2) return [];
-  
-  var headers = parseCSVLine(lines[0]);
-  var data = [];
-  
-  for (var i = 1; i < lines.length; i++) {
-    if (lines[i].trim()) {
-      var values = parseCSVLine(lines[i]);
-      var record = {};
-      for (var j = 0; j < headers.length; j++) {
-        record[headers[j]] = values[j] || '';
-      }
-      data.push(record);
-    }
-  }
-  
-  return data;
-}
-
-function parseCSVLine(line) {
-  var result = [];
-  var current = '';
-  var inQuotes = false;
-  
-  for (var i = 0; i < line.length; i++) {
-    var char = line[i];
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-  result.push(current.trim());
-  return result;
-}
-
-// Sample data
-function addSampleData() {
-  var sampleData = [
-    {
-      person: 'Christine Lagarde',
-      role: 'ECB President',
-      institution: 'European Central Bank',
-      institution_country: 'EU',
-      date_iso: '2025-01-15',
-      quote_verbatim: 'The IMF has provided invaluable guidance during these challenging economic times.',
-      tone_toward_imf: 'Supportive',
-      topic_tags: 'Monetary Policy|Economic Guidance|Central Banking',
-      context: 'Remarks during ECB quarterly press conference',
-      venue_link: 'https://example.com/ecb-press'
-    },
-    {
-      person: 'Bruno Le Maire',
-      role: 'Finance Minister',
-      institution: 'French Ministry of Finance',
-      institution_country: 'France',
-      date_iso: '2025-01-12',
-      quote_verbatim: 'We have serious concerns about the IMF recommendations regarding our fiscal policies.',
-      tone_toward_imf: 'Critical',
-      topic_tags: 'Fiscal Policy|Budget|Government Spending|Structural Reforms',
-      context: 'Interview with Financial Times',
-      venue_link: 'https://example.com/ft-interview'
-    },
-    {
-      person: 'Ursula von der Leyen',
-      role: 'Commission President',
-      institution: 'European Commission',
-      institution_country: 'EU',
-      date_iso: '2025-01-10',
-      quote_verbatim: 'The European Union continues to work closely with international institutions including the IMF.',
-      tone_toward_imf: 'Neutral',
-      topic_tags: 'International Cooperation|EU Policy|Multilateral Relations',
-      context: 'State of the Union address',
-      venue_link: 'https://example.com/state-union'
-    },
-    {
-      person: 'Paolo Gentiloni',
-      role: 'Commissioner for Economy',
-      institution: 'European Commission',
-      institution_country: 'EU',
-      date_iso: '2025-01-08',
-      quote_verbatim: 'The IMF forecast aligns with our analysis of eurozone growth prospects.',
-      tone_toward_imf: 'Supportive',
-      topic_tags: 'Economic Forecasts|Growth|Eurozone|Economic Analysis',
-      context: 'European Economic Forum presentation',
-      venue_link: 'https://example.com/econ-forum'
-    }
-  ];
-  
-  allData = allData.concat(sampleData.map(transformRecord));
-  saveToStorage();
-  populateFilters();
-  filterData();
-  updateButtonStates();
-  updateStatus('Added ' + sampleData.length + ' sample records. Total: ' + allData.length);
-}
-
-// Filtering
-function populateFilters() {
-  // Update topic filter
-  var allTopics = [];
-  allData.forEach(function(record) {
-    allTopics = allTopics.concat(record.topics || []);
-  });
-  var uniqueTopics = allTopics.filter(function(topic, index) {
-    return allTopics.indexOf(topic) === index;
-  }).sort();
-  
-  var topicSelect = document.getElementById('topicSelect');
-  if (topicSelect) {
-    var currentValue = topicSelect.value;
-    topicSelect.innerHTML = '<option value="">All Topics</option>';
-    uniqueTopics.forEach(function(topic) {
-      var option = document.createElement('option');
-      option.value = topic;
-      option.textContent = topic;
-      topicSelect.appendChild(option);
+  try {
+    // Post to proxy to avoid CORS; proxy forwards to N8N_WEBHOOK_URL
+    const r = await fetch("/api/proxy", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload)
     });
-    topicSelect.value = currentValue;
-  }
-  
-  // Update institution filter
-  var allInstitutions = allData.map(function(record) {
-    return record.institution;
-  }).filter(Boolean);
-  var uniqueInstitutions = allInstitutions.filter(function(inst, index) {
-    return allInstitutions.indexOf(inst) === index;
-  }).sort();
-  
-  var institutionSelect = document.getElementById('institutionSelect');
-  if (institutionSelect) {
-    var currentValue = institutionSelect.value;
-    institutionSelect.innerHTML = '<option value="">All Institutions</option>';
-    uniqueInstitutions.forEach(function(institution) {
-      var option = document.createElement('option');
-      option.value = institution;
-      option.textContent = institution;
-      institutionSelect.appendChild(option);
-    });
-    institutionSelect.value = currentValue;
-  }
-}
-
-function setToneFilter(tone, button) {
-  currentFilters.tone = tone;
-  
-  // Update button states
-  var buttons = document.querySelectorAll('.tone-btn');
-  buttons.forEach(function(btn) {
-    btn.classList.remove('active');
-  });
-  if (button) button.classList.add('active');
-  
-  filterData();
-}
-
-function filterData() {
-  // Get current filter values
-  var topicSelect = document.getElementById('topicSelect');
-  var institutionSelect = document.getElementById('institutionSelect');
-  var searchBox = document.getElementById('searchBox');
-  
-  if (topicSelect) currentFilters.topic = topicSelect.value;
-  if (institutionSelect) currentFilters.institution = institutionSelect.value;
-  if (searchBox) currentFilters.search = searchBox.value.toLowerCase();
-  
-  // Apply filters
-  filteredData = allData.filter(function(record) {
-    // Tone filter
-    var toneMatch = currentFilters.tone === 'All' || record.tone === currentFilters.tone;
-    
-    // Topic filter
-    var topicMatch = !currentFilters.topic || (record.topics && record.topics.includes(currentFilters.topic));
-    
-    // Institution filter
-    var institutionMatch = !currentFilters.institution || record.institution === currentFilters.institution;
-    
-    // Search filter
-    var searchMatch = true;
-    if (currentFilters.search) {
-      var searchText = [
-        record.person,
-        record.role,
-        record.institution,
-        record.quote,
-        record.context
-      ].join(' ').toLowerCase();
-      searchMatch = searchText.includes(currentFilters.search);
-    }
-    
-    return toneMatch && topicMatch && institutionMatch && searchMatch;
-  });
-  
-  // Sort by date (newest first)
-  filteredData.sort(function(a, b) {
-    var dateA = new Date(a.date || '1900-01-01');
-    var dateB = new Date(b.date || '1900-01-01');
-    return dateB - dateA;
-  });
-  
-  renderCards();
-  updateCount();
-}
-
-function clearFilters() {
-  currentFilters = { tone: 'All', topic: '', institution: '', search: '' };
-  
-  // Reset UI
-  setToneFilter('All', document.querySelector('.tone-btn[data-tone="All"]'));
-  
-  var topicSelect = document.getElementById('topicSelect');
-  var institutionSelect = document.getElementById('institutionSelect');
-  var searchBox = document.getElementById('searchBox');
-  
-  if (topicSelect) topicSelect.value = '';
-  if (institutionSelect) institutionSelect.value = '';
-  if (searchBox) searchBox.value = '';
-  
-  filterData();
-}
-
-// Rendering
-function renderCards() {
-  var container = document.getElementById('cards');
-  if (!container) return;
-  
-  if (filteredData.length === 0) {
-    container.innerHTML = '<div class="empty-state"><h3>No data matches your filters</h3><p>Try adjusting your search criteria or add some data.</p></div>';
-    return;
-  }
-  
-  var html = '';
-  filteredData.forEach(function(record) {
-    html += renderCard(record);
-  });
-  
-  container.innerHTML = html;
-}
-
-function renderCard(record) {
-  var initials = getInitials(record.person);
-  var toneClass = 'tone-' + record.tone.toLowerCase();
-  
-  var topicsHtml = (record.topics || []).slice(0, 6).map(function(topic) {
-    return '<span class="badge topic" onclick="filterByTopic(\'' + escapeHtml(topic) + '\')">' + escapeHtml(topic) + '</span>';
-  }).join('');
-  
-  var secondaryLinks = (record.secondary || '').split(/[|,]/).filter(Boolean);
-  var linksHtml = secondaryLinks.map(function(link, i) {
-    return '<span class="separator">•</span><a href="' + escapeHtml(link.trim()) + '" target="_blank" rel="noopener">Link ' + (i + 1) + ' ↗</a>';
-  }).join('');
-  
-  return '<article class="card">' +
-    '<div class="card-header">' +
-      '<div class="avatar">' + initials + '</div>' +
-      '<div class="card-meta">' +
-        '<div class="card-name">' + escapeHtml(record.person) + '</div>' +
-        '<div class="card-role">' + escapeHtml(record.role) + '</div>' +
-        '<div class="card-date">' + escapeHtml(formatDate(record.date)) + '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="card-quote">"' + escapeHtml(record.quote) + '"</div>' +
-    (record.context ? '<div class="card-context"><strong>Context:</strong> ' + escapeHtml(record.context) + '</div>' : '') +
-    '<div class="card-badges">' +
-      '<span class="badge ' + toneClass + '" onclick="filterByTone(\'' + record.tone + '\')">' + record.tone + '</span>' +
-      topicsHtml +
-    '</div>' +
-    '<div class="card-footer">' +
-      (record.source ? '<a href="' + escapeHtml(record.source) + '" target="_blank" rel="noopener">Source ↗</a>' : '') +
-      linksHtml +
-    '</div>' +
-  '</article>';
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  try {
-    return new Date(dateStr).toLocaleDateString();
+    const data = await r.json().catch(() => ({}));
+    if (data.reply) add("bot", data.reply);
+    if (data.ticket) $("ticket").textContent = "Ticket: " + data.ticket;
+    if (!data.reply && r.status !== 200) add("bot", "Server replied with " + r.status);
   } catch (e) {
-    return dateStr;
+    add("bot", "Error contacting server.");
+  } finally {
+    $("send").disabled = false;
   }
 }
 
-// Filter by clicking badges
-function filterByTopic(topic) {
-  var topicSelect = document.getElementById('topicSelect');
-  if (topicSelect) {
-    topicSelect.value = topic;
-    filterData();
-  }
-}
+/* ========= wiring ========= */
+$("loginBtn").addEventListener("click", login);
+$("send").addEventListener("click", send);
+$("text").addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+$("delivery").addEventListener("change", () => {
+  const needsEmail = $("delivery").value === "email";
+  $("email").disabled = !needsEmail;
+  if (!needsEmail) $("email").value = "";
+});
 
-function filterByTone(tone) {
-  setToneFilter(tone, document.querySelector('.tone-btn[data-tone="' + tone + '"]'));
-}
-
-// Export functions (popup-free)
-function downloadCSV() {
-  if (!allData.length) {
-    alert('No data to download');
-    return;
-  }
-  
-  var headers = ['Person', 'Role', 'Institution', 'Date', 'Quote', 'Tone', 'Topics', 'Context', 'Source'];
-  var csvContent = headers.join(',') + '\n';
-  
-  allData.forEach(function(record) {
-    var row = [
-      escapeCSV(record.person),
-      escapeCSV(record.role),
-      escapeCSV(record.institution),
-      escapeCSV(record.date),
-      escapeCSV(record.quote),
-      escapeCSV(record.tone),
-      escapeCSV((record.topics || []).join('|')),
-      escapeCSV(record.context),
-      escapeCSV(record.source)
-    ];
-    csvContent += row.join(',') + '\n';
-  });
-  
-  downloadFile(csvContent, 'imf_mentions_' + new Date().toISOString().split('T')[0] + '.csv', 'text/csv');
-  updateStatus('CSV downloaded with ' + allData.length + ' records');
-}
-
-function downloadReport() {
-  if (!allData.length) {
-    alert('No data to export');
-    return;
-  }
-  
-  var html = buildReportHTML();
-  downloadFile(html, 'IMF_Report_' + new Date().toISOString().split('T')[0] + '.html', 'text/html');
-  updateStatus('Report downloaded - open the HTML file and use Ctrl+P to print to PDF');
-  
-  setTimeout(function() {
-    alert('✅ Report downloaded!\n\nTo convert to PDF:\n1. Open the downloaded HTML file\n2. Press Ctrl+P (or Cmd+P on Mac)\n3. Choose "Save as PDF"\n4. Click Save');
-  }, 500);
-}
-
-function buildReportHTML() {
-  var html = '<!DOCTYPE html><html><head><title>IMF Europe Mentions Report</title><style>';
-  html += 'body{font-family:Arial,sans-serif;margin:40px;line-height:1.6;color:#333}';
-  html += 'h1{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:10px;margin-bottom:20px}';
-  html += '.record{margin:25px 0;padding:20px;border:1px solid #e5e7eb;border-radius:8px;page-break-inside:avoid}';
-  html += '.name{font-weight:bold;font-size:16px;margin-bottom:5px}';
-  html += '.meta{color:#6b7280;margin:3px 0;font-size:14px}';
-  html += '.quote{font-style:italic;margin:15px 0;padding:15px;background:#f8fafc;border-left:4px solid #2563eb}';
-  html += '.context{margin:10px 0;padding:10px;background:#fefefe;border-radius:4px}';
-  html += '.topics{margin:10px 0;font-size:13px}';
-  html += '.topic{background:#f1f5f9;padding:2px 6px;border-radius:10px;margin:0 3px}';
-  html += '@media print{body{margin:0.5in}.record{page-break-inside:avoid}}';
-  html += '</style></head><body>';
-  
-  html += '<h1>🌍 IMF Europe Mentions Report</h1>';
-  html += '<div style="background:#f8fafc;padding:15px;border-radius:8px;margin-bottom:30px;">';
-  html += '<p><strong>Generated:</strong> ' + new Date().toLocaleDateString() + ' at ' + new Date().toLocaleTimeString() + '</p>';
-  html += '<p><strong>Total Records:</strong> ' + allData.length + '</p>';
-  html += '<p><strong>Filtered Records:</strong> ' + filteredData.length + '</p>';
-  html += '</div>';
-  
-  filteredData.forEach(function(record, i) {
-    html += '<div class="record">';
-    html += '<div class="name">' + (i + 1) + '. ' + escapeHtml(record.person) + '</div>';
-    html += '<div class="meta"><strong>Role:</strong> ' + escapeHtml(record.role) + '</div>';
-    if (record.institution) html += '<div class="meta"><strong>Institution:</strong> ' + escapeHtml(record.institution) + '</div>';
-    html += '<div class="meta"><strong>Date:</strong> ' + escapeHtml(formatDate(record.date)) + '</div>';
-    html += '<div class="quote">"' + escapeHtml(record.quote) + '"</div>';
-    if (record.context) html += '<div class="context"><strong>Context:</strong> ' + escapeHtml(record.context) + '</div>';
-    html += '<div class="meta"><strong>Sentiment:</strong> ' + escapeHtml(record.tone) + '</div>';
-    if (record.topics && record.topics.length) {
-      html += '<div class="topics"><strong>Topics:</strong> ';
-      html += record.topics.map(function(topic) { return '<span class="topic">' + escapeHtml(topic) + '</span>'; }).join(' ');
-      html += '</div>';
-    }
-    if (record.source) html += '<div class="meta"><strong>Source:</strong> <a href="' + escapeHtml(record.source) + '">' + escapeHtml(record.source) + '</a></div>';
-    html += '</div>';
-  });
-  
-  html += '</body></html>';
-  return html;
-}
-
-function clearAllData() {
-  console.log('Clear data button clicked');
-  
-  try {
-    console.log('Clearing data...');
-    
-    // Clear data arrays
-    allData = [];
-    filteredData = [];
-    
-    // Clear localStorage
-    clearStorage();
-    
-    // Reset filters
-    currentFilters = { tone: 'All', topic: '', institution: '', search: '' };
-    
-    // Reset UI elements
-    var topicSelect = document.getElementById('topicSelect');
-    var institutionSelect = document.getElementById('institutionSelect');
-    var searchBox = document.getElementById('searchBox');
-    var fileInput = document.getElementById('csvFile');
-    
-    if (topicSelect) topicSelect.innerHTML = '<option value="">All Topics</option>';
-    if (institutionSelect) institutionSelect.innerHTML = '<option value="">All Institutions</option>';
-    if (searchBox) searchBox.value = '';
-    if (fileInput) fileInput.value = '';
-    
-    // Reset tone buttons
-    var toneButtons = document.querySelectorAll('.tone-btn');
-    toneButtons.forEach(function(btn) {
-      btn.classList.remove('active');
-    });
-    var allButton = document.querySelector('.tone-btn[data-tone="All"]');
-    if (allButton) allButton.classList.add('active');
-    
-    // Update display
-    renderCards();
-    updateButtonStates();
-    updateCount();
-    updateStatus('✅ All data has been cleared successfully');
-    
-    console.log('Data cleared successfully');
-    
-  } catch (error) {
-    console.error('Error clearing data:', error);
-    updateStatus('Error clearing data: ' + error.message);
-  }
-}
-
-// Utility functions
-function escapeCSV(field) {
-  if (!field) return '';
-  field = String(field);
-  if (field.includes(',') || field.includes('"') || field.includes('\n')) {
-    return '"' + field.replace(/"/g, '""') + '"';
-  }
-  return field;
-}
-
-function downloadFile(content, filename, type) {
-  var blob = new Blob([content], { type: type });
-  var url = URL.createObjectURL(blob);
-  var link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
-
-// Storage
-function saveToStorage() {
-  try {
-    localStorage.setItem('imf_dashboard_data', JSON.stringify(allData));
-  } catch (e) {
-    console.warn('Storage save failed:', e);
-  }
-}
-
-function loadFromStorage() {
-  try {
-    var saved = localStorage.getItem('imf_dashboard_data');
-    if (saved) {
-      var data = JSON.parse(saved);
-      if (Array.isArray(data) && data.length > 0) {
-        allData = data;
-        return true;
-      }
-    }
-  } catch (e) {
-    console.warn('Storage load failed:', e);
-  }
-  return false;
-}
-
-function clearStorage() {
-  try {
-    localStorage.removeItem('imf_dashboard_data');
-  } catch (e) {
-    console.warn('Storage clear failed:', e);
-  }
-}
-
-// Initialize
-function initialize() {
-  if (loadFromStorage()) {
-    populateFilters();
-    filterData();
-    updateButtonStates();
-    updateStatus('Loaded ' + allData.length + ' records from previous session');
-  } else {
-    updateStatus('Ready - Upload CSV or add test data to begin');
-  }
-}
-
-// Start when page loads
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initialize);
-} else {
-  initialize();
-}
+/* ========= initial ========= */
+setStatus("Locked");
+enableControls(false);
 </script>
 </body>
 </html>
