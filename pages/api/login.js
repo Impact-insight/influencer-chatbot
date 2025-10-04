@@ -1,18 +1,44 @@
+// pages/api/login.js
+
 export const config = { api: { bodyParser: true } };
 
 export default function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
+  const method = req.method || 'GET';
 
-  const input = (req.body && req.body.password) || '';
-  const expected = process.env.SITE_PASSWORD || 'password';
-
-  if (input !== expected) {
-    return res.status(401).json({ ok: false, error: 'Wrong password' });
+  // Allow simple preflight if ever called
+  if (method === 'OPTIONS') {
+    res.setHeader('Allow', 'GET, POST, OPTIONS');
+    return res.status(204).end();
   }
 
-  // 1-day auth cookie
-  res.setHeader('Set-Cookie',
-    'site_auth=1; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400; Secure'
+  // Only GET (for quick tests) and POST (from the form) are supported
+  if (method !== 'POST' && method !== 'GET') {
+    res.setHeader('Allow', 'GET, POST, OPTIONS');
+    return res.status(405).end('Method Not Allowed');
+  }
+
+  // Read password from body (POST) or query (GET)
+  const input =
+    (method === 'POST'
+      ? (req.body?.password || req.body?.pass || '')
+      : (req.query?.pass || req.query?.password || '')).toString().trim();
+
+  // Secret comes from env (prefer SITE_PASSWORD; fallback to CHATBOT_PASS)
+  const secret = (process.env.SITE_PASSWORD || process.env.CHATBOT_PASS || '').trim();
+  if (!secret) {
+    return res.status(500).json({ ok: false, error: 'SITE_PASSWORD (or CHATBOT_PASS) not set' });
+  }
+
+  if (input !== secret) {
+    return res.status(403).json({ ok: false, error: 'Wrong password' });
+  }
+
+  // Set auth cookie for middleware to allow access
+  const maxAge = 60 * 60 * 24 * 30; // 30 days
+  res.setHeader(
+    'Set-Cookie',
+    `site_auth=1; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}; Secure`
   );
+
   return res.status(200).json({ ok: true });
 }
