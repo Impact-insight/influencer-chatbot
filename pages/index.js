@@ -157,8 +157,13 @@ const chatbotHTML = `<!DOCTYPE html>
         body: JSON.stringify({ sessionId: sessionId(), chatInput: text })
       });
       
-      const data = await r.json();
+      let data = await r.json();
       removeTyping();
+      
+      // Handle array response from N8N (when "All Incoming Items" is selected)
+      if(Array.isArray(data) && data.length > 0){
+        data = data[0];
+      }
       
       const message = data.reply || data.output || data.message || 'No response';
       add('bot', message);
