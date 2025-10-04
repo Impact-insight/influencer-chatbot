@@ -144,34 +144,39 @@ const chatbotHTML = `<!DOCTYPE html>
     '3) Prefer delivery via email or link?'
   );
 
-  async function send(){
-    const input = el('msg');
-    const text = (input.value || '').trim();
-    if(!text) return;
-    add('me', text);
-    input.value = '';
-    el('send').disabled = true;
-    addTyping();
+ async function send(){
+  const input = el('msg');
+  const text = (input.value || '').trim();
+  if(!text) return;
+  add('me', text);
+  input.value = '';
+  el('send').disabled = true;
+  addTyping();
 
-    try{
-      const r = await fetch(API, {
-        method: 'POST',
-        headers: {'content-type':'application/json'},
-       body: JSON.stringify({ sessionId: sessionId(), chatInput: text })
-      });
-      removeTyping();
-      let data = {};
-      try { data = await r.json(); } catch {}
-      if(data.reply) add('bot', data.reply);
-      else if(!data.reply && r.status !== 200) add('bot', 'Server responded ' + r.status);
-      if(data.ticket) el('ticket').textContent = 'Ticket: ' + data.ticket;
-    }catch(e){
-      removeTyping();
-      add('bot','Error contacting server.');
-    }finally{
-      el('send').disabled = false;
+  try{
+    const r = await fetch(API, {
+      method: 'POST',
+      headers: {'content-type':'application/json'},
+      body: JSON.stringify({ sessionId: sessionId(), chatInput: text })  // ← Changed!
+    });
+    removeTyping();
+    let data = {};
+    try { data = await r.json(); } catch {}
+    
+    if(data.reply) {
+      add('bot', data.reply);
+    } else if(!data.reply && r.status !== 200) {
+      add('bot', 'Server responded ' + r.status);
     }
+    
+    if(data.ticket) el('ticket').textContent = 'Ticket: ' + data.ticket;
+  }catch(e){
+    removeTyping();
+    add('bot','Error contacting server.');
+  }finally{
+    el('send').disabled = false;
   }
+}
 
   el('send').addEventListener('click', send);
   el('msg').addEventListener('keydown', (e)=>{
