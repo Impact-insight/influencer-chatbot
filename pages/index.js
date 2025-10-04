@@ -138,66 +138,36 @@ const chatbotHTML = `<!DOCTYPE html>
     if(t) t.remove();
   }
 
-  add('bot',
-    'Hi! I can help prepare the research.\\n' +
-    '1) What should I produce (profile, infographic, or full research)?\\n' +
-    '2) Who is the influencer (full name)? If there are several, I'll list options.\\n' +
-    '3) Prefer delivery via email or link?'
-  );
+  add('bot', 'Please share the influencer\\'s full name.');
 
   async function send(){
     const input = el('msg');
     const text = (input.value || '').trim();
     if(!text) return;
+    
     add('me', text);
     input.value = '';
     el('send').disabled = true;
     addTyping();
 
     try{
-      console.log('Sending:', { sessionId: sessionId(), chatInput: text });
-      
       const r = await fetch(API, {
         method: 'POST',
         headers: {'content-type':'application/json'},
         body: JSON.stringify({ sessionId: sessionId(), chatInput: text })
       });
       
-      console.log('Response status:', r.status);
-      
-      const responseText = await r.text();
-      console.log('Raw response:', responseText);
-      
+      const data = await r.json();
       removeTyping();
       
-      let data = {};
-      try { 
-        data = JSON.parse(responseText); 
-        console.log('Parsed data:', data);
-        console.log('data.reply:', data.reply);
-        console.log('Full data keys:', Object.keys(data));
-      } catch(e) {
-        console.error('JSON parse error:', e);
-        add('bot', 'Received invalid response');
-        return;
-      }
-      
-      // Try multiple possible field names
-      const message = data.reply || data.output || data.message || data.text;
-      
-      if(message) {
-        add('bot', message);
-      } else {
-        console.error('No message found in response. Full data:', JSON.stringify(data, null, 2));
-        add('bot', 'Received response but no message field found');
-      }
+      const message = data.reply || data.output || data.message || 'No response';
+      add('bot', message);
       
       if(data.ticket) el('ticket').textContent = 'Ticket: ' + data.ticket;
       
     }catch(e){
       removeTyping();
-      console.error('Fetch error:', e);
-      add('bot','Error contacting server: ' + e.message);
+      add('bot', 'Error: Could not connect to server');
     }finally{
       el('send').disabled = false;
     }
